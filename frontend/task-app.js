@@ -22,20 +22,28 @@ function addTask() {
         alert('Please enter a task!');
         return;
     }
-    
+
+    // Prevent adding the same task twice
+    const isDuplicate = tasks.some(t => t.text.toLowerCase() === text.toLowerCase());
+    if (isDuplicate) {
+        alert('This task already exists!');
+        return;
+    }
+
     const task = {
         id: Date.now(),
         text: text,
         completed: false,
         createdAt: new Date().toISOString()
     };
-    
+
     tasks.push(task);
     saveTasks();
     taskInput.value = '';
     renderTasks();
     updateStats();
 }
+
 
 // Save tasks to localStorage
 function saveTasks() {
@@ -84,3 +92,50 @@ function deleteTask(id) {
     renderTasks();
     updateStats();
 }
+
+// Edit task
+function editTask(id) {
+    const task = tasks.find(t => t.id === id);
+    const newText = prompt("Edit your task:", task.text);
+
+    if (newText !== null && newText.trim() !== "") {
+        task.text = newText.trim();
+        saveTasks();
+        renderTasks();
+    }
+}
+
+// Clear all completed tasks
+function clearCompleted() {
+    tasks = tasks.filter(t => !t.completed);
+    saveTasks();
+    renderTasks();
+    updateStats();
+}
+
+// Update statistics
+function updateStats() {
+    const total = tasks.length;
+    const completed = tasks.filter(t => t.completed).length;
+    const active = total - completed;
+
+    document.getElementById("totalCount").textContent = total;
+    document.getElementById("completedCount").textContent = completed;
+    document.getElementById("activeCount").textContent = active;
+}
+
+// Filter buttons click events
+filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        currentFilter = btn.dataset.filter;
+        renderTasks();
+    });
+});
+
+// Add task on Enter key
+taskInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        addTask();
+    }
+});
+
